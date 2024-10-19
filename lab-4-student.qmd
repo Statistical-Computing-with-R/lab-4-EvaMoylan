@@ -20,7 +20,7 @@ California. A detailed description of the data can be found [here](https://githu
 
 The data come to us from [TidyTuesday](https://github.com/rfordatascience/tidytuesday).
 
-**0. Load the appropriate libraries and the data.**
+**1. Load the appropriate libraries and the data.**
 
 ```{r}
 #| label: setup
@@ -74,10 +74,12 @@ ca_childcare |>
 ```{r}
 #| label: recoding-county-to-census-regions
 
-ca_childcare <- ca_childcare |> 
-  mutate(county_name = str_remove(county_name, "County"),
+ca_childcare <- ca_childcare |> #I want the object to be updated with regions
+  mutate(county_name = str_remove(string = county_name, 
+                                  pattern = "County"),
          region = fct_collapse(.f = county_name,
-                               "Superior California" = c("Butte ", 
+                               "Superior California" = c("Butte ",
+                                                         "Modoc ",
                                                          "Colusa ", 
                                                          "El Dorado ", 
                                                          "Glenn ", 
@@ -136,8 +138,8 @@ ca_childcare <- ca_childcare |>
                                                                "Imperial ")
                                ))
   
-# View the data frame with the new 'region' column
-ca_childcare
+# Check data with the new 'region' column
+print(ca_childcare)
 ```
 
 **4. Let's consider the median household income of each region, and how that income has changed over time. Create a table with ten rows, one for each region, and two columns, one for 2008 and one for 2018. The cells should contain the `median` of the median household income (expressed in 2018 dollars) of the `region` and the `study_year`. Arrange the rows by 2018 values.**
@@ -175,7 +177,7 @@ ca_childcare |>
               names_from = study_year,
               values_from = c(mhi_2018,
                               mc_infant)) |> 
-  slice_min(mc_infant_2018) #What region has the lowest median childcare for infants in 2018?
+  slice_min(mc_infant_2018) #Superior CA has the lowest med childcare for infants in 2018
 
 ```
 *Superior California has the lowest `median` full-time median weekly price of center-based childcare for infants in 2018. This region also has the lowest `median` median household income in 2018.*
@@ -202,9 +204,11 @@ ca_childcare |>
 **8. Look up the documentation for `lm()` and fit a linear regression model to the relationship shown in your plot above.**
 
 ```{r}
+#| label: linear-model
+
 # complete the code provided
-reg_mod1 <- lm()
-summary(reg_mod1)
+#reg_mod1 <- lm()
+#summary(reg_mod1)
 ```
 
 **9. Using the output from `summary()`, write out the estimated regression line (recall: $y = mx + b$).**
