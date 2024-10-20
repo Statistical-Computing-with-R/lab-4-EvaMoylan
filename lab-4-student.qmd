@@ -188,9 +188,36 @@ ca_childcare |>
 
 ```{r}
 #| label: recreate-plot
+#| message: false
 
+ca_childcare |>
+  pivot_longer(cols = mc_infant:mc_preschool,
+               names_to = "child_age",
+               values_to = "w_median_price") |>
+  select(study_year, region, child_age, w_median_price) |>
+  mutate(child_age = fct_recode(.f = child_age,
+                                "Infant" = "mc_infant",
+                                "Toddler" = "mc_toddler",
+                                "Preschool" = "mc_preschool")) |>
+  ggplot(mapping = aes(x = study_year,
+                       y = w_median_price,
+                       color = fct_reorder(.f = region,
+                                           .x = w_median_price,
+                                           .desc = TRUE))) +
+  geom_point() +
+  geom_smooth(method = "loess") +
+  facet_wrap(~child_age) +
+  scale_x_continuous(n.breaks = 6) +
+  scale_y_continuous(limits = c(100, 500)) +
+  scale_fill_manual() +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 45)) +
+  labs(x = "Study Year",
+       y = NULL,
+       title = "Weekly Median Price for Center-Based Childcare ($)",
+       color = "California Region")
+  
 ```
-
 
 ## Median Household Income vs. Childcare Costs for Infants
 
