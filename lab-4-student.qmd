@@ -62,9 +62,7 @@ ca_childcare <- childcare_costs |>
             ) |>
   filter(state_abbreviation == "CA")
 
-ca_childcare |>
-  distinct(county_name)
-
+ca_childcare
 ```
 
 **3. Using a function from the `forcats` package, complete the code below to create a new variable where each county is categorized into one of the [10 Census regions](https://census.ca.gov/regions/) in California. Use the Region description (from the plot), not the Region number.**  
@@ -241,9 +239,9 @@ ca_childcare |>
   geom_smooth(method = "lm", color = "tomato3") +
   theme_bw() +
   theme(plot.margin = unit(c(0.5,1,0.5,1), "cm")) + #x-axis gets cut off on right without added margin
-  labs(x = "Weekly Median Price for Center-Based Infant Childcare ($)",
+  labs(x = "Median Household Income in California Counties ($)",
        y = NULL,
-       title = "California Median Household Income (2018 $) Based on Infant Childcare Cost")
+       title = "Infant Childcare Cost 2008-2018 ($) Across Household Income")
   
 ```
 
@@ -253,8 +251,9 @@ ca_childcare |>
 #| label: linear-model
 
 # complete the code provided
-reg_mod1 <- lm(formulat = mhi_2018 ~ mc_infant, 
+reg_mod1 <- lm(formula = mhi_2018 ~ mc_infant, 
                data = ca_childcare)
+
 
 summary(reg_mod1)
 ```
