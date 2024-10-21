@@ -1,7 +1,7 @@
 ---
 title: "Lab 4: Childcare Costs in California"
 author: "Eva Moylan"
-date: "10/17/24"
+date: "10/20/24"
 format: 
   html:  
     embed-resources: true
@@ -44,8 +44,7 @@ glimpse(counties)
 
 **1. Briefly describe the dataset (~ 4 sentences). What information does it contain?**
 
-*The childcare_costs data set includes childcare price data along with attributes of that child like information about their care provider(s), characteristics of the county they live in and their age. These data were collected during 2008-2018 in the United States. The counties data set includes counties within the USA with their corresponding code, and the state they are in.*
-
+*The childcare_costs dataset includes childcare prices across counties in the USA along with other attributes of households in that county. These data were collected across years 2008-2018 and each observation in the datset represents information for a single county in a single year. The counties dataset includes USA counties with their corresponding code, and the state they are in.*
 
 ## California Childcare Costs
 
@@ -194,38 +193,58 @@ ca_childcare |>
   pivot_longer(cols = mc_infant:mc_preschool,
                names_to = "child_age",
                values_to = "w_median_price") |>
-  select(study_year, region, child_age, w_median_price) |>
   mutate(child_age = fct_recode(.f = child_age,
                                 "Infant" = "mc_infant",
                                 "Toddler" = "mc_toddler",
-                                "Preschool" = "mc_preschool")) |>
+                                "Preschool" = "mc_preschool"),
+         region = as.character(region),
+         region = fct(region,
+                      levels = c("San Francisco Bay Area",
+                "Orange County",
+                "Los Angeles County",
+                "Northern San Joaquin Valley",
+                "Central Coast",
+                "Inland Empire",
+                "Superior California",
+                "Southern San Joaquin Valley",
+                "San Diego Area - Imperial",
+                "North Coast"))) |>
   ggplot(mapping = aes(x = study_year,
                        y = w_median_price,
-                       color = fct_reorder(.f = region,
-                                           .x = w_median_price,
-                                           .desc = TRUE))) +
+                       color = region)) +
   geom_point() +
-  geom_smooth(method = "loess") +
+  geom_smooth(method = "loess", 
+              linewidth = 0.5) +
   facet_wrap(~child_age) +
-  scale_x_continuous(n.breaks = 6) +
-  scale_y_continuous(limits = c(100, 500)) +
-  scale_fill_manual() +
+  scale_x_continuous(n.breaks = 4) +
+  scale_y_continuous(limits = c(100, 
+                                500)) +
   theme_bw() +
-  theme(axis.text.x = element_text(angle = 45)) +
   labs(x = "Study Year",
        y = NULL,
        title = "Weekly Median Price for Center-Based Childcare ($)",
        color = "California Region")
   
 ```
-
 ## Median Household Income vs. Childcare Costs for Infants
 
 **7. Create a scatterplot showing the relationship between median household income (expressed in 2018 dollars) and the full-time median weekly price charged for center-based childcare for an infant in California. Overlay a linear regression line (lm) to show the trend.**
 
 ```{r}
 #| label: scatterplot-median-income-vs-childcare-cost
+#| message: false
 
+ca_childcare |>
+  ggplot(mapping = aes(x = mhi_2018,
+                       y = mc_infant)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(method = "lm", color = "tomato3") +
+  theme_bw() +
+  theme(plot.margin = unit(c(0.5,1,0.5,1), "cm")) + #x-axis gets cut off on right without added margin
+  labs(x = "Weekly Median Price for Center-Based Infant Childcare ($)",
+       y = NULL,
+       title = "California Median Household Income (2018 $) Based on Infant Childcare Cost")
+  
 ```
 
 **8. Look up the documentation for `lm()` and fit a linear regression model to the relationship shown in your plot above.**
@@ -234,10 +253,16 @@ ca_childcare |>
 #| label: linear-model
 
 # complete the code provided
-#reg_mod1 <- lm()
-#summary(reg_mod1)
+reg_mod1 <- lm(formulat = mhi_2018 ~ mc_infant, 
+               data = ca_childcare)
+
+summary(reg_mod1)
 ```
 
 **9. Using the output from `summary()`, write out the estimated regression line (recall: $y = mx + b$).**
 
+*CA median household $ income = 283.36(weekly median $ price for center-based infant childcare) - 14669.86*
+
 **10. Do you have evidence to conclude there is a relationship between the median household income and the median weekly cost of center-based childcare for infants in California? Cite values from your `summary()` output to support your claim!**
+
+*We can conclude there is a positive linear relationship between weekly median price for center-based infant childcare and the median household income ($) of parents in California counties in years 2008 to 2018 (est. = 283.37, SE = 8.52, P < 0.001).*
