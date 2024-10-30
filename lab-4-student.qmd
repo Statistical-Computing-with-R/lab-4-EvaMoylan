@@ -38,8 +38,6 @@ childcare_costs <- read_csv('https://raw.githubusercontent.com/rfordatascience/t
 
 counties <- read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2023/2023-05-09/counties.csv')
 
-glimpse(childcare_costs)
-glimpse(counties)
 ```
 
 **1. Briefly describe the dataset (~ 4 sentences). What information does it contain?**
@@ -61,7 +59,7 @@ ca_childcare <- childcare_costs |>
              by = "county_fips_code" #just joining with one key so don't need to use 'join_by'
             ) |>
   filter(state_abbreviation == "CA")
-
+  
 ca_childcare
 ```
 
@@ -153,10 +151,14 @@ ca_childcare |>
   pivot_wider(id_cols = "region", #region stays from original table orientation 
               names_from = study_year, #I want 2008 and 2018 to become columns
               values_from = mhi_2018) |>  #I want the corresponding values to be this
-  select(c(`2008`,`2018`)) |>
-  arrange(desc(`2018`))
+  select(c(`region`,`2008`,`2018`)) |> #rename these columns
+  rename("mhi_2008" = "2008",
+         "mhi_2018" = "2018") |>
+  arrange(desc(`mhi_2018`))
 
 ```
+
+*Question 4 Reflection: added region and renamed columns* 
 
 **5. Which California `region` had the lowest `median` full-time median weekly price for center-based childcare for infants in 2018? Does this `region` correspond to the `region` with the lowest `median` income in 2018 that you found in Q4?**  
 *Hint: The code should give me the EXACT answer. This means having the code output the exact row(s) and variable(s) necessary for providing the solution.*
@@ -165,18 +167,22 @@ ca_childcare |>
 #| label: lowest-median-weekly-price-2018
 
 ca_childcare |>
+  filter(study_year == 2018) |> #filter first to work with less data, this was moved from original version
   group_by(region, study_year) |>
   summarize(mhi_2018 = median(mhi_2018), #values now are median for each year at each county
             mc_infant = median(mc_infant),
             .groups = 'drop') |>
-  filter(study_year == 2018) |>
   pivot_wider(id_cols = "region", #region stays from original table orientation 
               names_from = study_year,
               values_from = c(mhi_2018,
-                              mc_infant)) |> 
-  slice_min(mc_infant_2018) #Superior CA has the lowest med childcare for infants in 2018
+                              mc_infant)) |>
+  rename("mhi_2018" = "mhi_2018_2018") |> #this was added to original version
+  arrange(mc_infant_2018) #Superior CA has the lowest med childcare for infants in 2018
+
+#How to get only superior without using slice_min?
 
 ```
+
 *Superior California has the lowest `median` full-time median weekly price of center-based childcare for infants in 2018. This region also has the lowest `median` median household income in 2018.*
 
 **6. The following plot shows, for all ten regions, the change over time of the full-time median price for center-based childcare for infants, toddlers, and preschoolers. Recreate the plot. You do not have to replicate the exact colors or theme, but your plot should have the same content, including the order of the facets and legend, reader-friendly labels, axes breaks, and a loess smoother.**
@@ -195,6 +201,11 @@ ca_childcare |>
                                 "Infant" = "mc_infant",
                                 "Toddler" = "mc_toddler",
                                 "Preschool" = "mc_preschool"),
+         child_age = as.character(child_age),
+         child_age = fct(child_age,
+                         levels = c("Infant",
+                                    "Toddler",
+                                    "Preschool")),
          region = as.character(region),
          region = fct(region,
                       levels = c("San Francisco Bay Area",
@@ -210,20 +221,26 @@ ca_childcare |>
   ggplot(mapping = aes(x = study_year,
                        y = w_median_price,
                        color = region)) +
-  geom_point() +
+  geom_point(size = 0.5) +
   geom_smooth(method = "loess", 
               linewidth = 0.5) +
   facet_wrap(~child_age) +
-  scale_x_continuous(n.breaks = 4) +
+  scale_x_continuous(n.breaks = 6) +
   scale_y_continuous(limits = c(100, 
                                 500)) +
   theme_bw() +
   labs(x = "Study Year",
        y = NULL,
        title = "Weekly Median Price for Center-Based Childcare ($)",
-       color = "California Region")
+       color = "California Region") +
+  theme(aspect.ratio = 1,
+        axis.text = element_text(size = 6),
+        axis.title = element_text(size = 8),
+        title = element_text(size = 8))
   
 ```
+*Question 6 Revision: changed order of facet, changed axis text and point size to fit better, changed aspect ratio, need to change colors*
+
 ## Median Household Income vs. Childcare Costs for Infants
 
 **7. Create a scatterplot showing the relationship between median household income (expressed in 2018 dollars) and the full-time median weekly price charged for center-based childcare for an infant in California. Overlay a linear regression line (lm) to show the trend.**
