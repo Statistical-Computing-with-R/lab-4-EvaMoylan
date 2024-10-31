@@ -149,15 +149,15 @@ ca_childcare |>
                          2018)) |>
   pivot_wider(id_cols = "region", #region stays from original table orientation 
               names_from = study_year, #I want 2008 and 2018 to become columns
-              values_from = mhi_2018) |>  #I want the corresponding values to be this
-  select(c(`region`,`2008`,`2018`)) |> #rename these columns
-  rename("mhi_2008" = "2008",
-         "mhi_2018" = "2018") |>
-  arrange(desc(`mhi_2018`))
+              values_from = mhi_2018, #I want the corresponding values to be this
+              names_prefix = "Med_household_income_") |>  
+  rename("Region" = "region") |>
+  select(c(`Region`, starts_with("Med_household_income_"))) |> 
+  arrange(desc(`Med_household_income_2018`))
 
 ```
 
-*Question 4 Reflection: added region and renamed columns* 
+*Question 4 Reflection: added region and renamed using pivot wider* 
 
 **5. Which California `region` had the lowest `median` full-time median weekly price for center-based childcare for infants in 2018? Does this `region` correspond to the `region` with the lowest `median` income in 2018 that you found in Q4?**  
 *Hint: The code should give me the EXACT answer. This means having the code output the exact row(s) and variable(s) necessary for providing the solution.*
