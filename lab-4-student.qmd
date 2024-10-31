@@ -43,7 +43,9 @@ counties <- read_csv('https://raw.githubusercontent.com/rfordatascience/tidytues
 
 **1. Briefly describe the dataset (~ 4 sentences). What information does it contain?**
 
-*The childcare_costs dataset includes childcare prices across counties in the USA along with other attributes of households in that county. These data were collected across years 2008-2018 and each observation in the datset represents information for a single county in a single year. The counties dataset includes USA counties with their corresponding code, and the state they are in.*
+*These data are from the National Database of Childcare Prices, which is a federal source of childcare prices at the county level. The childcare_costs dataset includes childcare prices across counties in the USA along with other attributes of households in that county. These data were collected across years 2008-2018 and each observation in the dataset represents information for a single county in a single year. The counties dataset includes USA counties with their corresponding code, and the state they are in.*
+
+*Question 1 Reflection: added context of the data, first sentence*
 
 ## California Childcare Costs
 
@@ -166,7 +168,7 @@ ca_childcare |>
 #| label: lowest-median-weekly-price-2018
 
 ca_childcare |>
-  filter(study_year == 2018) |> #filter first to work with less data, this was moved from original version
+  filter(study_year == 2018) |> #filter first to work with less data
   group_by(region, study_year) |>
   summarize(mhi_2018 = median(mhi_2018), #values now are median for each year at each county
             mc_infant = median(mc_infant),
@@ -175,8 +177,10 @@ ca_childcare |>
               names_from = study_year,
               values_from = c(mhi_2018,
                               mc_infant)) |>
-  rename("mhi_2018" = "mhi_2018_2018") |> #this was added to original version
-  slice_min(mc_infant_2018) #Superior CA has the lowest med childcare for infants in 2018
+  rename("Median_household_income_2018" = "mhi_2018_2018",
+         "Median_infant_childcare$_2018" = "mc_infant_2018",
+         "Region" = "region") |> 
+  slice_min(`Median_infant_childcare$_2018`) #Superior CA has the lowest med childcare for infants in 2018
 
 ```
 
@@ -229,7 +233,7 @@ ca_childcare |>
         legend.title = element_text(size = 9))
   
 ```
-*Question 6 Revision: changed order of facet, changed axis text and point size to fit better, changed aspect ratio, made color palette*
+*Question 6 Reflection: changed order of facet, changed axis text and point size to fit better, changed aspect ratio, made color palette*
 
 ## Median Household Income vs. Childcare Costs for Infants
 
