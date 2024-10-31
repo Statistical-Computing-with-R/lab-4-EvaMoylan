@@ -27,6 +27,7 @@ The data come to us from [TidyTuesday](https://github.com/rfordatascience/tidytu
 #| message: false
 
 library(tidyverse)
+library(RColorBrewer)
 
 ```
 
@@ -133,8 +134,6 @@ ca_childcare <- ca_childcare |> #I want the object to be updated with regions
                                                                "Imperial ")
                                ))
   
-# Check data with the new 'region' column
-print(ca_childcare)
 ```
 
 **4. Let's consider the median household income of each region, and how that income has changed over time. Create a table with ten rows, one for each region, and two columns, one for 2008 and one for 2018. The cells should contain the `median` of the median household income (expressed in 2018 dollars) of the `region` and the `study_year`. Arrange the rows by 2018 values.**
@@ -177,9 +176,7 @@ ca_childcare |>
               values_from = c(mhi_2018,
                               mc_infant)) |>
   rename("mhi_2018" = "mhi_2018_2018") |> #this was added to original version
-  arrange(mc_infant_2018) #Superior CA has the lowest med childcare for infants in 2018
-
-#How to get only superior without using slice_min?
+  slice_min(mc_infant_2018) #Superior CA has the lowest med childcare for infants in 2018
 
 ```
 
@@ -193,34 +190,25 @@ ca_childcare |>
 #| label: recreate-plot
 #| message: false
 
+palette <- colorRampPalette(brewer.pal(8,"Accent"))(10) #Brewer palette only has 8 colors, so make a palette with 10
+
 ca_childcare |>
   pivot_longer(cols = mc_infant:mc_preschool,
                names_to = "child_age",
                values_to = "w_median_price") |>
-  mutate(child_age = fct_recode(.f = child_age,
+  mutate(child_age = fct_recode(.f = child_age, #Change the names of each level
                                 "Infant" = "mc_infant",
                                 "Toddler" = "mc_toddler",
                                 "Preschool" = "mc_preschool"),
-         child_age = as.character(child_age),
-         child_age = fct(child_age,
-                         levels = c("Infant",
-                                    "Toddler",
-                                    "Preschool")),
-         region = as.character(region),
-         region = fct(region,
-                      levels = c("San Francisco Bay Area",
-                "Orange County",
-                "Los Angeles County",
-                "Northern San Joaquin Valley",
-                "Central Coast",
-                "Inland Empire",
-                "Superior California",
-                "Southern San Joaquin Valley",
-                "San Diego Area - Imperial",
-                "North Coast"))) |>
+         child_age = fct_relevel(.f = child_age, #Change order of the levels
+                                 "Infant",
+                                 "Toddler",
+                                 "Preschool")) |>
   ggplot(mapping = aes(x = study_year,
                        y = w_median_price,
-                       color = region)) +
+                       color = fct_reorder2(.f = region,
+                                            .x = study_year,
+                                            .y = w_median_price))) + #Order the regions by median price
   geom_point(size = 0.5) +
   geom_smooth(method = "loess", 
               linewidth = 0.5) +
@@ -229,6 +217,7 @@ ca_childcare |>
   scale_y_continuous(limits = c(100, 
                                 500)) +
   theme_bw() +
+  scale_color_manual(values = palette) + #use the palette made earlier
   labs(x = "Study Year",
        y = NULL,
        title = "Weekly Median Price for Center-Based Childcare ($)",
@@ -236,10 +225,11 @@ ca_childcare |>
   theme(aspect.ratio = 1,
         axis.text = element_text(size = 6),
         axis.title = element_text(size = 8),
-        title = element_text(size = 8))
+        title = element_text(size = 8),
+        legend.title = element_text(size = 9))
   
 ```
-*Question 6 Revision: changed order of facet, changed axis text and point size to fit better, changed aspect ratio, need to change colors*
+*Question 6 Revision: changed order of facet, changed axis text and point size to fit better, changed aspect ratio, made color palette*
 
 ## Median Household Income vs. Childcare Costs for Infants
 
@@ -268,17 +258,18 @@ ca_childcare |>
 #| label: linear-model
 
 # complete the code provided
-reg_mod1 <- lm(formula = mhi_2018 ~ mc_infant, 
+reg_mod1 <- lm(formula = mc_infant ~ mhi_2018, 
                data = ca_childcare)
 
 
 summary(reg_mod1)
 ```
+*Question 8 Revision: flipped variables!*
 
 **9. Using the output from `summary()`, write out the estimated regression line (recall: $y = mx + b$).**
 
-*CA median household $ income = 283.36(weekly median $ price for center-based infant childcare) - 14669.86*
+*CA median household $ income = (2.24e-03)(weekly median $ price for center-based infant childcare) - (1.317e+02)*
 
 **10. Do you have evidence to conclude there is a relationship between the median household income and the median weekly cost of center-based childcare for infants in California? Cite values from your `summary()` output to support your claim!**
 
-*We can conclude there is a positive linear relationship between weekly median price for center-based infant childcare and the median household income ($) of parents in California counties in years 2008 to 2018 (est. = 283.37, SE = 8.52, P < 0.001).*
+*We can conclude there is a positive linear relationship between weekly median price for center-based infant childcare and the median household income ($) of parents in California counties in years 2008 to 2018 (est. = 2.24e-03, SE = 6.73e-05, P < 0.001, R-sq = 0.635).*
