@@ -45,7 +45,7 @@ counties <- read_csv('https://raw.githubusercontent.com/rfordatascience/tidytues
 
 *These data are from the National Database of Childcare Prices, which is a federal source of childcare prices at the county level. The childcare_costs dataset includes childcare prices across counties in the USA along with other attributes of households in that county. These data were collected across years 2008-2018 and each observation in the dataset represents information for a single county in a single year. The counties dataset includes USA counties with their corresponding code, and the state they are in.*
 
-*Question 1 Reflection: added context of the data, first sentence*
+*Question 1 Reflection: In my original submission, I didn't include information about where these data are from. Providing context for data beyond the contents of a data table is important because this helps inform our interpretation of the data or the results of analyzing those data. So, I added information on what database the childcare data we used are from.*
 
 ## California Childcare Costs
 
@@ -159,7 +159,7 @@ ca_childcare |>
 
 ```
 
-*Question 4 Reflection: added region and renamed using pivot wider* 
+*Question 4 Reflection: In this revision, I added the region column back into the final table output and renamed the column names for median household income in 2008 and 2018. Without context for the median household income columns, listing their values doesn't tell us any information. Adding the region column into the final output makes it clear that each row corresponds with different region.* 
 
 **5. Which California `region` had the lowest `median` full-time median weekly price for center-based childcare for infants in 2018? Does this `region` correspond to the `region` with the lowest `median` income in 2018 that you found in Q4?**  
 *Hint: The code should give me the EXACT answer. This means having the code output the exact row(s) and variable(s) necessary for providing the solution.*
@@ -233,7 +233,7 @@ ca_childcare |>
         legend.title = element_text(size = 9))
   
 ```
-*Question 6 Reflection: changed order of facet, changed axis text and point size to fit better, changed aspect ratio, made color palette*
+*Question 6 Reflection: I made a lot of formatting changes to this plot, including changing the order of faceting, the size of the label text, the aspect ratio and making a custom color palette. Using a color pallet that is color-blind friendly instead of the default color scheme makes plots accessible to a wider range of viewers. In my original submission, I didn't use the aspect ratio argument within theme and once I applied this, I was able to change most of the text to match the sample plot instead of needing to remove years or angle the labels. This will be helpful in the future too and I'll remember I can use this argument to change the size of plots instead of ggsave.*
 
 ## Median Household Income vs. Childcare Costs for Infants
 
@@ -268,7 +268,7 @@ reg_mod1 <- lm(formula = mc_infant ~ mhi_2018,
 
 summary(reg_mod1)
 ```
-*Question 8 Revision: flipped variables!*
+*Question 8 Reflection: I had the variables flipped in my linear model formula because I forgot that the formula was y ~ x and not x ~ y. This was a good reminder to double check how certain statistical analysis functions need formulas formatted because inputting variables incorrectly will output an incorrect model.*
 
 **9. Using the output from `summary()`, write out the estimated regression line (recall: $y = mx + b$).**
 
